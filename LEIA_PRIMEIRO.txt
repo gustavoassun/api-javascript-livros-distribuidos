@@ -1,0 +1,42 @@
+COMO INICIAR O PROJETO NO WINDOWS
+=================================
+
+Voce precisa instalar apenas o Docker Desktop.
+Nao precisa instalar PostgreSQL, MySQL ou Node.js separadamente.
+
+1. Confirme que o Windows possui o Docker Desktop instalado.
+2. Abra o Docker Desktop.
+3. Aguarde aparecer "Engine running".
+4. Extraia TODO o ZIP para uma pasta normal. Nao execute dentro do ZIP.
+5. Clique duas vezes no arquivo INICIAR_E_TESTAR.bat.
+
+O arquivo ira:
+- verificar o Docker;
+- baixar e iniciar API, PostgreSQL e MySQL;
+- testar cadastro, consulta, atualizacao e exclusao;
+- confirmar a escrita e a exclusao nos dois bancos.
+
+Na primeira vez, o download das imagens pode demorar alguns minutos.
+
+Se aparecer ERRO:
+- nao tente adivinhar;
+- abra o arquivo diagnostico.txt criado na pasta;
+- envie esse arquivo ou um print da janela para o Chat.
+
+Endereco esperado depois do sucesso:
+http://localhost:3001/health
+
+ARQUIVOS IMPORTANTES PARA A INTEGRACAO
+=======================================
+
+INTEGRACAO_FABIO.md
+  Informacoes de porta, variaveis, Docker e contrato para a API Java.
+
+openapi.yaml
+  Contrato completo dos endpoints e respostas.
+
+docker-compose.backend.yml
+  Sobe somente a API JavaScript e usa os bancos do ambiente conjunto.
+
+.env.fabio.example
+  Modelo das variaveis necessarias para conectar aos bancos compartilhados.

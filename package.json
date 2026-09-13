@@ -1,0 +1,24 @@
+{
+  "name": "api-javascript-livros",
+  "version": "1.1.0",
+  "private": true,
+  "description": "API Node.js do CRUD distribuido de livros",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "test": "node --test \"test/*.test.js\"",
+    "test:integration": "node scripts/integration-test.js",
+    "check": "npm test && node --check src/server.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "mysql2": "^3.14.5",
+    "pg": "^8.16.3"
+  }
+}

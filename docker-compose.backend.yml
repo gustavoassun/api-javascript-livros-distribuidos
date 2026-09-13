@@ -1,0 +1,29 @@
+services:
+  api-javascript:
+    build: .
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      MYSQL_HOST: ${MYSQL_HOST}
+      MYSQL_PORT: ${MYSQL_PORT:-3306}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      DB_CONNECT_TIMEOUT_MS: ${DB_CONNECT_TIMEOUT_MS:-3000}
+      HEALTH_TIMEOUT_MS: ${HEALTH_TIMEOUT_MS:-1000}
+      REPLICATION_INTERVAL_MS: ${REPLICATION_INTERVAL_MS:-5000}
+    ports:
+      - "${API_JAVASCRIPT_PORT:-3001}:3000"
+    networks:
+      - sistemas-distribuidos
+    restart: unless-stopped
+
+networks:
+  sistemas-distribuidos:
+    external: true
+    name: ${DOCKER_NETWORK:-sistemas-distribuidos}

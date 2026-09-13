@@ -1,0 +1,248 @@
+openapi: 3.0.3
+info:
+  title: API JavaScript do Sistema Distribuido de Livros
+  version: 1.1.0
+  description: API Node.js do Grupo JavaScript, com PostgreSQL principal e replicacao no MySQL.
+servers:
+  - url: http://localhost:3001
+    description: Execucao local pelo Docker Compose
+  - url: http://api-javascript:3000
+    description: Comunicacao interna entre containers
+tags:
+  - name: Livros
+  - name: Monitoramento
+paths:
+  /health:
+    get:
+      tags: [Monitoramento]
+      summary: Verifica a disponibilidade da API e dos bancos
+      responses:
+        '200':
+          description: API disponivel, com status ok ou degradado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+        '503':
+          description: PostgreSQL principal indisponivel
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+  /livros:
+    get:
+      tags: [Livros]
+      summary: Lista todos os livros
+      responses:
+        '200':
+          description: Lista de livros
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Livro'
+        '503':
+          $ref: '#/components/responses/BancoIndisponivel'
+        '500':
+          $ref: '#/components/responses/ErroInterno'
+    post:
+      tags: [Livros]
+      summary: Cadastra um livro
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LivroEntrada'
+      responses:
+        '201':
+          description: Livro cadastrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Livro'
+        '400':
+          $ref: '#/components/responses/RequisicaoInvalida'
+        '409':
+          description: ISBN ja cadastrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+        '503':
+          $ref: '#/components/responses/BancoIndisponivel'
+        '500':
+          $ref: '#/components/responses/ErroInterno'
+  /livros/{id_livro}:
+    parameters:
+      - $ref: '#/components/parameters/IdLivro'
+    get:
+      tags: [Livros]
+      summary: Consulta um livro pelo identificador
+      responses:
+        '200':
+          description: Livro encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Livro'
+        '400':
+          $ref: '#/components/responses/RequisicaoInvalida'
+        '404':
+          $ref: '#/components/responses/NaoEncontrado'
+        '503':
+          $ref: '#/components/responses/BancoIndisponivel'
+        '500':
+          $ref: '#/components/responses/ErroInterno'
+    put:
+      tags: [Livros]
+      summary: Atualiza todos os campos editaveis de um livro
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LivroEntrada'
+      responses:
+        '200':
+          description: Livro atualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Livro'
+        '400':
+          $ref: '#/components/responses/RequisicaoInvalida'
+        '404':
+          $ref: '#/components/responses/NaoEncontrado'
+        '409':
+          description: ISBN ja cadastrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Erro'
+        '503':
+          $ref: '#/components/responses/BancoIndisponivel'
+        '500':
+          $ref: '#/components/responses/ErroInterno'
+    delete:
+      tags: [Livros]
+      summary: Exclui um livro
+      responses:
+        '204':
+          description: Livro excluido, sem corpo de resposta
+        '400':
+          $ref: '#/components/responses/RequisicaoInvalida'
+        '404':
+          $ref: '#/components/responses/NaoEncontrado'
+        '503':
+          $ref: '#/components/responses/BancoIndisponivel'
+        '500':
+          $ref: '#/components/responses/ErroInterno'
+components:
+  parameters:
+    IdLivro:
+      name: id_livro
+      in: path
+      required: true
+      description: Identificador inteiro positivo do livro
+      schema:
+        type: integer
+        minimum: 1
+  schemas:
+    LivroEntrada:
+      type: object
+      required: [titulo, isbn, autor, editora]
+      properties:
+        titulo:
+          type: string
+          minLength: 1
+          maxLength: 200
+          example: Dom Casmurro
+        isbn:
+          type: string
+          minLength: 1
+          maxLength: 20
+          example: '9780000000000'
+        autor:
+          type: string
+          minLength: 1
+          maxLength: 150
+          example: Machado de Assis
+        editora:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: Editora X
+    Livro:
+      allOf:
+        - $ref: '#/components/schemas/LivroEntrada'
+        - type: object
+          required: [id_livro, data_cadastro, data_atualizacao]
+          properties:
+            id_livro:
+              type: integer
+              example: 1
+            data_cadastro:
+              type: string
+              format: date-time
+            data_atualizacao:
+              type: string
+              format: date-time
+    EstadoBanco:
+      type: object
+      required: [nome, conectado]
+      properties:
+        nome:
+          type: string
+          enum: [postgres, mysql]
+        conectado:
+          type: boolean
+    Health:
+      type: object
+      required: [status, servico, banco_principal, banco_replica, timestamp]
+      properties:
+        status:
+          type: string
+          enum: [ok, degradado, indisponivel]
+        servico:
+          type: string
+          enum: [api-javascript]
+        banco_principal:
+          $ref: '#/components/schemas/EstadoBanco'
+        banco_replica:
+          $ref: '#/components/schemas/EstadoBanco'
+        timestamp:
+          type: string
+          format: date-time
+    Erro:
+      type: object
+      required: [erro]
+      properties:
+        erro:
+          type: string
+  responses:
+    RequisicaoInvalida:
+      description: Payload ou identificador invalido
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Erro'
+    NaoEncontrado:
+      description: Livro nao encontrado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Erro'
+    BancoIndisponivel:
+      description: Banco principal indisponivel
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Erro'
+    ErroInterno:
+      description: Erro interno inesperado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Erro'

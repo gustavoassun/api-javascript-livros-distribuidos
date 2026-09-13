@@ -1,0 +1,38 @@
+@baseUrl = http://localhost:3001
+
+### Identificar o servico
+GET {{baseUrl}}/
+
+### Verificar saude da API e dos bancos
+GET {{baseUrl}}/health
+
+### Cadastrar livro
+POST {{baseUrl}}/livros
+Content-Type: application/json
+
+{
+  "titulo": "Dom Casmurro",
+  "isbn": "9780000000000",
+  "autor": "Machado de Assis",
+  "editora": "Editora X"
+}
+
+### Listar livros
+GET {{baseUrl}}/livros
+
+### Buscar livro por ID
+GET {{baseUrl}}/livros/1
+
+### Atualizar livro por ID
+PUT {{baseUrl}}/livros/1
+Content-Type: application/json
+
+{
+  "titulo": "Dom Casmurro - Edicao Atualizada",
+  "isbn": "9780000000000",
+  "autor": "Machado de Assis",
+  "editora": "Editora Atualizada"
+}
+
+### Excluir livro por ID
+DELETE {{baseUrl}}/livros/1

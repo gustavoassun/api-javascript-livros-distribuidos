@@ -1,0 +1,12 @@
+services:
+  api-javascript:
+    environment:
+      # O MySQL do Evandro roda fora deste Compose e e acessado pela porta
+      # publicada no Windows. Os valores sao lidos do .env de integracao.
+      MYSQL_HOST: ${EVANDRO_MYSQL_HOST:-host.docker.internal}
+      MYSQL_PORT: ${EVANDRO_MYSQL_PORT:-3306}
+      MYSQL_DATABASE: ${EVANDRO_MYSQL_DATABASE:-biblioteca_db}
+      MYSQL_USER: ${EVANDRO_MYSQL_USER}
+      MYSQL_PASSWORD: ${EVANDRO_MYSQL_PASSWORD}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
