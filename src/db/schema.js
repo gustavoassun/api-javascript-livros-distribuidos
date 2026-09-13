@@ -2,7 +2,7 @@ import { postgresPool, mysqlPool } from './connections.js';
 
 const postgresSchema = `
   CREATE TABLE IF NOT EXISTS livros (
-    id_livro SERIAL PRIMARY KEY,
+    id_livro INTEGER PRIMARY KEY,
     titulo VARCHAR(200) NOT NULL,
     isbn VARCHAR(20) NOT NULL UNIQUE,
     autor VARCHAR(150) NOT NULL,
@@ -28,6 +28,8 @@ const postgresSchema = `
 `;
 
 const replicationQueueMigration = `
+  ALTER TABLE livros ALTER COLUMN id_livro DROP DEFAULT;
+
   DO $$
   BEGIN
     IF EXISTS (

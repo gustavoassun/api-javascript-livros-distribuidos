@@ -13,6 +13,27 @@ async function enqueue(client, operation, bookId, data) {
   );
 }
 
+async function ensureUniqueBook(client, data, excludedId = null) {
+  const result = await client.query(
+    `SELECT
+       LOWER(BTRIM(titulo)) = LOWER(BTRIM($1)) AS titulo_duplicado,
+       isbn = $2 AS isbn_duplicado
+       FROM livros
+      WHERE (LOWER(BTRIM(titulo)) = LOWER(BTRIM($1)) OR isbn = $2)
+        AND ($3::integer IS NULL OR id_livro <> $3)
+      LIMIT 1`,
+    [data.titulo, data.isbn, excludedId]
+  );
+
+  const duplicate = result.rows[0];
+  if (duplicate?.titulo_duplicado) {
+    throw new AppError(409, 'Ja existe um livro cadastrado com esse titulo');
+  }
+  if (duplicate?.isbn_duplicado) {
+    throw new AppError(409, 'Ja existe um livro cadastrado com esse ISBN');
+  }
+}
+
 async function inTransaction(callback) {
   const client = await postgresPool.connect();
   try {
@@ -36,21 +57,21 @@ async function inTransaction(callback) {
 
 export async function createBook(data) {
   return inTransaction(async (client) => {
-    // Mantem a sequence correta caso a API Python tenha inserido IDs explicitos.
+    // O PostgreSQL compartilhado nao gera IDs porque e a replica do backend Python.
+    // O bloqueio serializa a escolha do proximo ID durante a escrita do JavaScript.
     await client.query('LOCK TABLE livros IN SHARE ROW EXCLUSIVE MODE');
-    await client.query(`
-      SELECT setval(
-        pg_get_serial_sequence('livros', 'id_livro'),
-        COALESCE(MAX(id_livro), 1),
-        MAX(id_livro) IS NOT NULL
-      ) FROM livros
-    `);
+    await ensureUniqueBook(client, data);
+
+    const idResult = await client.query(
+      'SELECT COALESCE(MAX(id_livro), 0) + 1 AS proximo_id FROM livros'
+    );
+    const nextId = Number(idResult.rows[0].proximo_id);
 
     const result = await client.query(
-      `INSERT INTO livros (titulo, isbn, autor, editora)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO livros (id_livro, titulo, isbn, autor, editora)
+       VALUES ($1, $2, $3, $4, $5)
        RETURNING ${bookColumns}`,
-      [data.titulo, data.isbn, data.autor, data.editora]
+      [nextId, data.titulo, data.isbn, data.autor, data.editora]
     );
     const book = result.rows[0];
     await enqueue(client, 'CREATE', book.id_livro, book);
@@ -82,6 +103,8 @@ export async function updateBook(id, data) {
     if (locked.rowCount === 0) {
       throw new AppError(404, 'Livro nao encontrado');
     }
+
+    await ensureUniqueBook(client, data, id);
 
     const result = await client.query(
       `UPDATE livros
