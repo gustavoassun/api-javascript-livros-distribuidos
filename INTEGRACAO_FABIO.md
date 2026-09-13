@@ -138,6 +138,18 @@ docker compose start mysql
 
 O resultado esperado é `degradado` durante a queda e `ok` depois que todas as pendências forem replicadas.
 
+## Padronização com o backend Python
+
+A fila utiliza o contrato compartilhado abaixo:
+
+- `payload` em JSON e sempre preenchido, inclusive no `DELETE`;
+- `status` com tamanho 20 e valores `pendente` ou `processado`;
+- `tentativas` incrementado somente quando uma replicação falha;
+- `processado_em` preenchido quando o evento é concluído;
+- processamento em ordem de `criado_em` e `id`.
+
+O serviço também migra automaticamente instalações anteriores que ainda possuam as colunas `dados` ou `atualizado_em`.
+
 ## Observações para o proxy Java
 
 - Encaminhar o método HTTP, caminho, corpo JSON e `Content-Type` sem alterar os nomes dos campos.

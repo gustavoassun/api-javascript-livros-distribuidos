@@ -30,6 +30,10 @@ O objetivo é permitir que a API Java Orquestradora alterne entre os backends Ja
 
 Não é utilizada transação distribuída entre os bancos. A consistência é eventual e controlada pela fila de replicação.
 
+### Contrato compartilhado da fila
+
+A tabela `fila_replicacao` segue o mesmo contrato do backend Python: `payload`, `status`, `tentativas`, `criado_em`, `processado_em` e `ultimo_erro`. Os únicos estados utilizados são `pendente` e `processado`. Isso permite que os dois backends utilizem os mesmos bancos sem divergência de schema.
+
 ## Início rápido
 
 Requisito: Docker Desktop aberto e com o mecanismo em execução.

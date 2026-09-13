@@ -21,6 +21,9 @@
 - [x] Transação no banco principal
 - [x] Bloqueio do registro em atualização concorrente
 - [x] Fila persistente no PostgreSQL
+- [x] Schema da fila padronizado com o backend Python
+- [x] Estados da fila limitados a `pendente` e `processado`
+- [x] Campo `payload` obrigatório, inclusive para exclusões
 - [x] Reprocessamento sequencial e cronológico
 - [x] Operações de criação, atualização e exclusão replicadas
 - [x] Estado `degradado` enquanto houver pendências
@@ -53,6 +56,7 @@ Estes passos devem ser executados pelo responsável pela integração porque dep
 - [ ] Conectar a API à rede Docker compartilhada
 - [ ] Confirmar `GET http://api-javascript:3000/health`
 - [ ] Encaminhar o CRUD pela API Java
-- [ ] Comparar as respostas da API JavaScript e da API Python
+- [x] Comparar contratos HTTP e schema da fila com a API Python
+- [ ] Comparar as respostas em execução da API JavaScript e da API Python
 - [ ] Derrubar o backend líder e confirmar o failover
 - [ ] Consultar os dois bancos após o teste final
