@@ -83,6 +83,10 @@ const replicationQueueMigration = `
      SET payload = json_build_object('id_livro', id_livro)
    WHERE payload IS NULL;
 
+  UPDATE fila_replicacao
+     SET status = 'pendente', processado_em = NULL
+   WHERE status NOT IN ('pendente', 'processado');
+
   ALTER TABLE fila_replicacao
     ALTER COLUMN payload TYPE JSON USING payload::json,
     ALTER COLUMN payload SET NOT NULL,
