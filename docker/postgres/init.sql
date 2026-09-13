@@ -9,16 +9,16 @@ CREATE TABLE IF NOT EXISTS livros (
 );
 
 CREATE TABLE IF NOT EXISTS fila_replicacao (
-  id BIGSERIAL PRIMARY KEY,
-  operacao VARCHAR(10) NOT NULL CHECK (operacao IN ('CREATE', 'UPDATE', 'DELETE')),
+  id SERIAL PRIMARY KEY,
+  operacao VARCHAR(10) NOT NULL,
   id_livro INTEGER NOT NULL,
-  dados JSONB,
-  status VARCHAR(15) NOT NULL DEFAULT 'pendente',
+  payload JSON NOT NULL,
+  status VARCHAR(20) NOT NULL DEFAULT 'pendente',
   tentativas INTEGER NOT NULL DEFAULT 0,
-  ultimo_erro TEXT,
-  criado_em TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  atualizado_em TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+  criado_em TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  processado_em TIMESTAMP,
+  ultimo_erro TEXT
 );
 
-CREATE INDEX IF NOT EXISTS idx_fila_replicacao_status_id
-  ON fila_replicacao (status, id);
+CREATE INDEX IF NOT EXISTS ix_fila_replicacao_status_criado_em_id
+  ON fila_replicacao (status, criado_em, id);
