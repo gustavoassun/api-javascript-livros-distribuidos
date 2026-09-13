@@ -7,9 +7,9 @@ const bookColumns = `
 
 async function enqueue(client, operation, bookId, data) {
   await client.query(
-    `INSERT INTO fila_replicacao (operacao, id_livro, dados)
-     VALUES ($1, $2, $3::jsonb)`,
-    [operation, bookId, data ? JSON.stringify(data) : null]
+    `INSERT INTO fila_replicacao (operacao, id_livro, payload)
+     VALUES ($1, $2, $3::json)`,
+    [operation, bookId, JSON.stringify(data)]
   );
 }
 
@@ -106,7 +106,7 @@ export async function deleteBook(id) {
     if (result.rowCount === 0) {
       throw new AppError(404, 'Livro nao encontrado');
     }
-    await enqueue(client, 'DELETE', id, null);
+    await enqueue(client, 'DELETE', id, result.rows[0]);
     return result.rows[0];
   });
 }
@@ -115,7 +115,7 @@ export async function countPendingReplication() {
   const result = await postgresPool.query(
     `SELECT COUNT(*)::int AS total
        FROM fila_replicacao
-      WHERE status IN ('pendente', 'processando')`
+      WHERE status = 'pendente'`
   );
   return result.rows[0].total;
 }
