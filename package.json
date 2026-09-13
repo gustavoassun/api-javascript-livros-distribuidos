@@ -1,6 +1,6 @@
 {
   "name": "api-javascript-livros",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "private": true,
   "description": "API Node.js do CRUD distribuido de livros",
   "type": "module",

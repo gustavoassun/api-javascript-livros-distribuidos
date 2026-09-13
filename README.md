@@ -14,6 +14,8 @@ O objetivo é permitir que a API Java Orquestradora alterne entre os backends Ja
 - reprocessamento cronológico e sequencial das pendências;
 - transações no PostgreSQL;
 - proteção de atualização concorrente com bloqueio de registro;
+- geração explícita e coordenada do `id_livro` no PostgreSQL compartilhado;
+- validação de título e ISBN duplicados;
 - health-check compatível com a eleição de líder;
 - tratamento padronizado de erros;
 - Docker Compose para execução isolada;
@@ -33,6 +35,8 @@ Não é utilizada transação distribuída entre os bancos. A consistência é e
 ### Contrato compartilhado da fila
 
 A tabela `fila_replicacao` segue o mesmo contrato do backend Python: `payload`, `status`, `tentativas`, `criado_em`, `processado_em` e `ultimo_erro`. Os únicos estados utilizados são `pendente` e `processado`. Isso permite que os dois backends utilizem os mesmos bancos sem divergência de schema.
+
+O `id_livro` é enviado explicitamente nas gravações. O PostgreSQL compartilhado não possui geração automática porque funciona como réplica do backend Python; quando o JavaScript é o líder, o próximo ID é calculado dentro de uma transação bloqueada e começa em `1` quando a tabela está vazia.
 
 ## Início rápido
 

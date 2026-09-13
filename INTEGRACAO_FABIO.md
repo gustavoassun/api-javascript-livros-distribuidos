@@ -150,6 +150,12 @@ A fila utiliza o contrato compartilhado abaixo:
 
 O serviço também migra automaticamente instalações anteriores que ainda possuam as colunas `dados` ou `atualizado_em`.
 
+## Geração do identificador compartilhado
+
+O PostgreSQL utilizado como réplica pelo backend Python não possui `DEFAULT` para `id_livro`. Por isso, a API JavaScript calcula `MAX(id_livro) + 1` sob bloqueio de tabela e envia o identificador explicitamente no `INSERT`. Em uma tabela vazia, o primeiro identificador será `1`.
+
+A API Java orquestradora deve manter somente um backend líder para escrita. Assim, o backend ativo calcula o próximo identificador sobre a cópia já sincronizada e o replica para o outro banco.
+
 ## Observações para o proxy Java
 
 - Encaminhar o método HTTP, caminho, corpo JSON e `Content-Type` sem alterar os nomes dos campos.

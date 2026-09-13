@@ -18,6 +18,9 @@
 - [x] PostgreSQL como banco principal
 - [x] MySQL como banco réplica
 - [x] Mesmo `id_livro` enviado aos dois bancos
+- [x] Primeiro `id_livro` iniciado em 1 sem depender de sequência no PostgreSQL
+- [x] Próximo `id_livro` calculado sob bloqueio de escrita
+- [x] Título e ISBN duplicados retornam HTTP 409
 - [x] Transação no banco principal
 - [x] Bloqueio do registro em atualização concorrente
 - [x] Fila persistente no PostgreSQL
