@@ -1,6 +1,10 @@
 import { Router } from 'express';
 import * as bookService from '../services/book-service.js';
-import { parseBookId, validateBookPayload } from '../utils/validation.js';
+import {
+  parseBookId,
+  validateBookPayload,
+  validateBookUpdatePayload
+} from '../utils/validation.js';
 import { AppError } from '../utils/app-error.js';
 
 export const booksRouter = Router();
@@ -25,6 +29,12 @@ booksRouter.get('/:id_livro', async (req, res) => {
 booksRouter.put('/:id_livro', async (req, res) => {
   const id = parseBookId(req.params.id_livro);
   const data = validateBookPayload(req.body);
+  res.status(200).json(await bookService.updateBook(id, data));
+});
+
+booksRouter.patch('/:id_livro', async (req, res) => {
+  const id = parseBookId(req.params.id_livro);
+  const data = validateBookUpdatePayload(req.body);
   res.status(200).json(await bookService.updateBook(id, data));
 });
 
