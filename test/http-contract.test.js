@@ -48,6 +48,20 @@ test('JSON malformado retorna HTTP 400', async () => {
   });
 });
 
+test('PATCH vazio retorna HTTP 400 sem consultar o banco', async () => {
+  await withServer(async (baseUrl) => {
+    const response = await fetch(`${baseUrl}/livros/1`, {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json' },
+      body: '{}'
+    });
+    const body = await response.json();
+
+    assert.equal(response.status, 400);
+    assert.match(body.erro, /pelo menos um campo/);
+  });
+});
+
 test('rota desconhecida retorna HTTP 404 em JSON', async () => {
   await withServer(async (baseUrl) => {
     const response = await fetch(`${baseUrl}/rota-inexistente`);
