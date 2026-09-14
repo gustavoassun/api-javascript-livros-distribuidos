@@ -1,6 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parseBookId, validateBookPayload } from '../src/utils/validation.js';
+import {
+  parseBookId,
+  validateBookPayload,
+  validateBookUpdatePayload
+} from '../src/utils/validation.js';
 
 test('normaliza um livro valido', () => {
   assert.deepEqual(validateBookPayload({
@@ -20,6 +24,30 @@ test('rejeita campo obrigatorio vazio', () => {
   assert.throws(
     () => validateBookPayload({ titulo: '', isbn: '1', autor: 'A', editora: 'E' }),
     /titulo e obrigatorio/
+  );
+});
+
+test('aceita atualizacao parcial e normaliza somente os campos enviados', () => {
+  assert.deepEqual(validateBookUpdatePayload({ titulo: '  Lampiao ' }), {
+    titulo: 'Lampiao'
+  });
+});
+
+test('rejeita atualizacao sem campos', () => {
+  assert.throws(
+    () => validateBookUpdatePayload({}),
+    /pelo menos um campo/
+  );
+});
+
+test('rejeita campo vazio ou desconhecido na atualizacao', () => {
+  assert.throws(
+    () => validateBookUpdatePayload({ autor: ' ' }),
+    /autor e obrigatorio/
+  );
+  assert.throws(
+    () => validateBookUpdatePayload({ preco: '10' }),
+    /preco nao pode ser atualizado/
   );
 });
 
