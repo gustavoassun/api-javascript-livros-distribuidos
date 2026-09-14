@@ -97,14 +97,22 @@ export async function findBookById(id) {
 export async function updateBook(id, data) {
   return inTransaction(async (client) => {
     const locked = await client.query(
-      'SELECT id_livro FROM livros WHERE id_livro = $1 FOR UPDATE',
+      `SELECT ${bookColumns} FROM livros WHERE id_livro = $1 FOR UPDATE`,
       [id]
     );
     if (locked.rowCount === 0) {
       throw new AppError(404, 'Livro nao encontrado');
     }
 
-    await ensureUniqueBook(client, data, id);
+    const currentBook = locked.rows[0];
+    const updatedData = {
+      titulo: data.titulo ?? currentBook.titulo,
+      isbn: data.isbn ?? currentBook.isbn,
+      autor: data.autor ?? currentBook.autor,
+      editora: data.editora ?? currentBook.editora
+    };
+
+    await ensureUniqueBook(client, updatedData, id);
 
     const result = await client.query(
       `UPDATE livros
@@ -112,7 +120,7 @@ export async function updateBook(id, data) {
               data_atualizacao = CURRENT_TIMESTAMP
         WHERE id_livro = $5
         RETURNING ${bookColumns}`,
-      [data.titulo, data.isbn, data.autor, data.editora, id]
+      [updatedData.titulo, updatedData.isbn, updatedData.autor, updatedData.editora, id]
     );
     const book = result.rows[0];
     await enqueue(client, 'UPDATE', id, book);
